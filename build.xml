@@ -1,0 +1,281 @@
+<?xml version="1.0"?>
+<project name="JD_ViewFrustumCulling" default="build" basedir="./">
+	<property file="c:/certs/my.build.properties"/> <!-- can't get certs.dir to work here -->
+	<property file="${os.name}.build.properties"/>
+	<property file="build.properties"/>
+	
+	<macrodef name="build-swf">
+		<attribute name="verboseStacktrace" />
+		<attribute name="incremental" />
+		<attribute name="optimize" />
+		<attribute name="debug" />
+		<attribute name="mobile" />
+		<attribute name="iPhone" />
+		<attribute name="android" />
+		<sequential>
+			<fail unless="swf.compiler" message="swf.compiler needs to be specified in build.properties as the location of MXMLC" />
+			<fail unless="swf.framerate" message="swf.framerate needs to be specified in build.properties as the framerate of the application" />
+			<fail unless="swf.background.color" message="swf.background.color needs to be specified in build.properties as the background color of the application" />
+			<fail unless="swf.width" message="swf.width needs to be specified in build.properties as the width of the application in pixels" />
+			<fail unless="swf.height" message="swf.height needs to be specified in build.properties as the height of the application in pixels" />
+			<fail unless="build.dir" message="build.dir needs to be specified in build.properties as the directory to output built files to" />
+			<fail unless="swf.output" message="swf.output needs to be specified in build.properties as the name of the built SWF" />
+			<fail unless="source.dir" message="source.dir needs to be specified in build.properties as the directory source files are found in" />
+			<fail unless="source.file" message="source.file needs to be specified in build.properties as the name of the root source file (ie. the entry point)" />
+			<fail unless="libraries" message="libraries needs to be specified in build.properties as a comma-delimited list of all used libraries" />
+			<fail unless="swf.fullplayerversion" message="swf.fullplayerversion needs to be specified in build.properties as the full version (eg. 10.0.0) of Flash you're targeting" />
+			<fail unless="swf.title" message="swf.title needs to be specified in build.properties as the title of the application" />
+			<fail unless="swf.description" message="swf.description needs to be specified in build.properties as a description of the application" />
+			<fail unless="swf.publisher" message="swf.publisher needs to be specified in build.properties as the publisher of the application" />
+			<fail unless="swf.creator" message="swf.creator needs to be specified in build.properties as the creator of the application" />
+			<fail unless="swf.language" message="swf.language needs to be specified in build.properties as the langauge the application is in (eg. EN)" />
+			
+			<echo message="+--------------------------+" />
+			<echo message="| Building the SWF Content |" />
+			<echo message="+--------------------------+" />
+			
+			<exec executable="${swf.compiler}" failonerror="true">
+				<arg line="-library-path+=${libraries}" />
+				<arg line="-external-library-path=${libraries.external}" />
+				<arg line="-static-link-runtime-shared-libraries" />
+				<arg line="-default-frame-rate ${swf.framerate}" />
+				<arg line="-default-background-color 0x${swf.background.color}" />
+				<arg line="-default-size ${swf.width} ${swf.height}" />
+				<arg line="-output ${build.dir}/${swf.output}"/>
+				<arg line="-source-path '${source.dir}'" />
+				<arg line="-source-path '${resource.dir}'" />
+				<arg line="-file-specs '${source.dir}/${source.file}'" />
+				<arg line="-target-player ${swf.fullplayerversion}" />
+				<arg line="-title '${swf.title}'" />
+				<arg line="-description '${swf.description}'" />
+				<arg line="-publisher '${swf.publisher}'" />
+				<arg line="-creator '${swf.creator}'" />
+				<arg line="-language '${swf.language}'" />
+				<arg line="-incremental=@{incremental}" />
+				<arg line="-optimize=@{optimize}" />
+				<arg line="-verbose-stacktraces=@{verboseStacktrace}" />
+				<arg line="-debug=@{debug}" />
+				<arg line="-define+=CONFIG::DEBUG,@{debug}" />
+				<arg line="-define+=CONFIG::RELEASE,!CONFIG::DEBUG" />
+				<arg line="-define+=SYSTEM::MOBILE,@{mobile}" />
+				<arg line="-define+=SYSTEM::FLASH,!SYSTEM::MOBILE" />
+				<arg line="-define+=SYSTEM::IOS,@{iPhone}" />
+				<arg line="-define+=SYSTEM::ANDROID,@{android}" />
+				<arg line="-define+=GAME::DEBUG_IP,&quot;'${debug.ip}'&quot;" />
+			</exec>
+			<echo message="" />
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="build-ipa">
+		<sequential>
+			<fail unless="build.dir" message="build.dir needs to be specified in build.properties as the directory to output built files to" />
+			<fail unless="ipa.descriptor" message="ipa.descriptor needs to be specified in the build.properties" />
+			<fail unless="ipa.output" message="ipa.output needs to be specificed in the build.properites" />
+			<fail unless="ipa.provisioning" message="ipa.provisioning needs to be specificed in the build.properties" />
+			<fail unless="ipa.target" message="ipa.target needs to be specified in the build.properties" />
+			<fail unless="ipa.compiler" message="ipa.compiler needs to be specified in the build.properties as the location of ADT" />
+			<fail unless="ipa.keystore" message="ipa.keystore needs to be specified in the build.properties" />
+			<fail unless="ipa.keystore.pass" message="ipa.keystore.pass needs to be specified in the build.properties" />
+			<fail unless="ipa.swf" message="ipa.swf needs to be specified in the build.properties" />
+			<fail unless="ipa.assets" message="ipa.assets needs to be specified in the build.properties" />
+		    <echo message="+------------------------------+" />
+			<echo message="| Building the IPA Application |" />
+			<echo message="+------------------------------+" />
+			<exec executable="${ipa.compiler}" failonerror="true">
+				<arg line="-package" />
+				<!--<arg line="-connect ${apk.remotedebugip}" />-->
+				<arg line="-target ${ipa.target}" />
+				<arg line="-provisioning-profile ${ipa.provisioning}" />
+				<arg line="-storetype pkcs12" />
+				<arg line="-keystore ${ipa.keystore}" />
+				<arg line="-storepass ${ipa.keystore.pass}" />
+				<arg line="${ipa.output}" />
+				<arg line="${ipa.descriptor}" />
+				<arg line="-C ${build.dir} ${ipa.swf} ${ipa.assets}
+					" />
+			</exec>
+			<echo message="" />
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="build-apk">
+		<sequential>
+			<fail unless="build.dir" message="build.dir needs to be specified in build.properties as the directory to output built files to" />
+			<fail unless="apk.descriptor" message="apk.descriptor needs to be specified in the build.properties" />
+			<fail unless="apk.output" message="apk.output needs to be specificed in the build.properites" />
+			<fail unless="apk.compiler" message="apk.compiler needs to be specified in the build.properties as the location of ADT" />
+			<fail unless="apk.keystore" message="apk.keystore needs to be specified in the build.properties" />
+			<fail unless="apk.swf" message="apk.swf needs to be specified in the build.properties" />
+			<fail unless="apk.assets" message="apk.assets needs to be specified in the build.properties" />
+		    <echo message="+------------------------------+" />
+			<echo message="| Building the APK Application |" />
+			<echo message="+------------------------------+" />
+			<exec executable="${apk.compiler}" failonerror="true">
+				<arg line="-package" />
+				<arg line="-target ${apk.target.captive}" />
+				<arg line="-storetype pkcs12" />
+				<arg line="-keystore ${apk.keystore}" />
+				<arg line="-storepass ${apk.keystore.pass}" />
+				<arg line="${apk.output}" />
+				<arg line="${apk.descriptor}" />
+				<arg line="${apk.swf} ${apk.assets}" />
+			</exec>
+			<echo message="" />
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="build-apk-debug">
+		<sequential>
+			<fail unless="build.dir" message="build.dir needs to be specified in build.properties as the directory to output built files to" />
+			<fail unless="apk.descriptor" message="apk.descriptor needs to be specified in the build.properties" />
+			<fail unless="apk.output" message="apk.output needs to be specificed in the build.properites" />
+			<fail unless="apk.compiler" message="apk.compiler needs to be specified in the build.properties as the location of ADT" />
+			<fail unless="apk.keystore" message="apk.keystore needs to be specified in the build.properties" />
+			<fail unless="apk.swf" message="apk.swf needs to be specified in the build.properties" />
+			<fail unless="apk.assets" message="apk.assets needs to be specified in the build.properties" />
+		    <echo message="+------------------------------+" />
+			<echo message="| Building the APK Application |" />
+			<echo message="+------------------------------+" />
+			<exec executable="${apk.compiler}" failonerror="true">
+				<arg line="-package" />
+				<arg line="-target ${apk.target.debug}" />
+				<!--<arg line="-connect ${debug.ip}" />-->
+				<arg line="-storetype pkcs12" />
+				<arg line="-keystore ${apk.keystore}" />
+				<arg line="-storepass ${apk.keystore.pass}" />
+				<arg line="${apk.output}" />
+				<arg line="${apk.descriptor}" />
+				<arg line="${apk.swf} ${apk.assets}" />
+			</exec>
+			<echo message="" />
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="build-air">
+		<sequential>
+			<fail unless="air.compiler" message="air.compiler needs to be specified in the build.properties as the location of ADT" />
+			<fail unless="air.keystore" message="air.keystore needs to be specified in the build.properties" />
+			<fail unless="air.keystore.pass" message="air.keystore.pass needs to be specified in the build.properties" />
+			<fail unless="air.output" message="air.ouput needs to be specified in the build.properties" />
+			<fail unless="air.content" message="air.content needs to be specified in the build.properties" />
+			<fail unless="air.descriptor" message="air.descriptor needs to be specified in the build.properties" />
+			<echo message="+------------------------------+" />
+			<echo message="| Building the AIR Application |" />
+			<echo message="+------------------------------+" />
+			<exec executable="${air.compiler}" failonerror="true">
+				<arg line="-package" />
+				<!-- -tsa none is a temproary fix -->
+				<arg line="-tsa none" /> 
+				<arg line="-storetype pkcs12" />
+				<arg line="-keystore ${air.keystore}" />
+				<arg line="-storepass ${air.keystore.pass}" />
+				<arg line="${air.output}" />
+				<arg line="${air.descriptor}" />
+				<arg line="${air.content} ${air.assets}" />
+			</exec>
+			<echo message="" />
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="debug-air">
+		<sequential>
+			<fail unless="air.debug.exec" message="air.debug.exec needs to be specified in the build.properties" />
+			<fail unless="air.descriptor.run" message="air.descriptor.run needs to be specified in the build.properties" />
+			<echo message="+-----------------------------------+" />
+			<echo message="| Playing with the AIR Debug Player |" />
+			<echo message="+-----------------------------------+" />
+			<echo message="${air.debug.exec}" />
+			<echo message="${air.descriptor.run}" />
+			<exec executable="${air.debug.exec}" failonerror="true">
+				<arg line="${air.descriptor.run} ${build.dir}" />
+			</exec>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="outputIPAddress">
+			<sequential>
+				<!-- Need a Windows-friendly way to find the local ip address -->
+				<!-- <exec executable="/bin/sh" outputproperty="debug.ip">
+					<arg value="-c" />
+					<arg value="ifconfig en0 | grep broadcast | awk '/inet/{print $2}'" />
+				</exec> -->
+				
+			</sequential>
+		</macrodef>
+	
+	<target name="runDebugAIR">
+		<debug-air />
+	</target>
+	
+	<target name="build" description="Build the application in debug mode">
+		<outputIPAddress />
+		<antcall target="clean" />
+		<build-swf verboseStacktrace="true" incremental="true" optimize="false" debug="true" mobile="false" android="false" iPhone="false" />
+		<debug-air />		
+	</target>
+	
+	<target name="buildRelease" description="Build the application in release mode">
+		<outputIPAddress />
+		<antcall target="clean" />
+		<build-swf verboseStacktrace="true" incremental="true" optimize="false" debug="false" mobile="false" android="false"  iPhone="false" />
+		<debug-air />		
+	</target>
+	
+	<target name="buildIPA" description="Build the application in release mode to iOS">
+		<outputIPAddress />
+		<antcall target="clean" />
+		<build-swf verboseStacktrace="false" incremental="false" optimize="true" debug="false" mobile="true" android="false"  iPhone="true" />
+		<build-ipa />
+	</target>
+	
+	<target name="buildIPADebug" description="Build the application in debug mode to iOS">
+		<echo message="${ipa.keystore}" />
+		<echo message="${ipa.keystore.pass}" />
+		<outputIPAddress />
+		<build-swf verboseStacktrace="true" incremental="true" optimize="true" debug="true" mobile="true" android="false"  iPhone="true" />
+		<build-ipa />
+	</target>
+	
+	<target name="buildAIR" description="Build the application as an AIR app">
+		<outputIPAddress />
+		<antcall target="clean" />
+		<build-swf verboseStacktrace="false" incremental="false" optimize="true" debug="false" mobile="false" android="false"  iPhone="false" />
+		<build-air />
+	</target>
+	
+	<target name="buildAPK" description="Build the application in release mode to Android">
+		<outputIPAddress />
+		<antcall target="clean" />
+		<build-swf verboseStacktrace="false" incremental="false" optimize="true" debug="false" mobile="true" android="true" iPhone="false" />
+		<build-apk />
+	</target>
+	
+	<target name="buildAPKDebug" description="Build the application in release mode to Android">
+		<outputIPAddress />
+		<antcall target="clean" />
+		<build-swf verboseStacktrace="true" incremental="false" optimize="true" debug="true" mobile="true" android="true"  iPhone="false" />
+		<build-apk-debug />
+	</target>
+	
+	<target name="clean" description="Clean incremental build files">
+		<delete>
+			<fileset dir="${build.dir}" includes="**/*.cache" />
+		</delete>
+	</target>
+	
+	<target name="importExternalLibraries" description="Copy the files specified in external_libraries.txt to swc.dir and build.dir as appropriate">
+		<fail unless="swc.dir" message="swc.dir needs to be specified in build.properties as the location to put external library SWC files" />
+		<fail unless="external.libraries.root.dir" message="external.libraries.root.dir needs to be specified in build.properties as the root directory that all external libraries are in" />
+		<fail unless="build.dir" message="build.dir needs to be specified in build.properties as the directory to output built files to" />
+		<copy todir="${swc.dir}" flatten="true">
+			<fileset dir="${external.libraries.root.dir}">
+				<patternset>
+					<includesfile name="external_libraries.txt" />
+					<exclude name="**/*.swf" />
+				</patternset>
+			</fileset>
+		</copy>
+	</target>
+	
+</project>

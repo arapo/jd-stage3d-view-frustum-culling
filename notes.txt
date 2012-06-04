@@ -1,0 +1,33 @@
+my.build.properties should look like:
+
+#####################################
+## iOS Properties
+#####################################
+
+ipa.keystore=${user.home}/Development/air/[iOScertificate.p12]
+ipa.keystore.pass=[password]
+ipa.provisioning=${user.home}/Development/air/[iOS_Team_Provisioning_Profile_.mobileprovision]
+
+#####################################
+## AIR Properties
+#####################################
+
+air.keystore=${user.home}/Development/air/[newcert.p12]
+air.keystore.pass=[password]
+
+#####################################
+## Android Properties
+#####################################
+
+apk.keystore=${user.home}/Development/air/[newcert.p12]
+apk.keystore.pass=[password]
+
+----
+AIR CERT: For now, generated a self-signed cert...
+	./Adobe/flex_sdk_4.6.0.23201_mpl/bin/adt -certificate -cn SelfSign -ou QE -o "Example, Co" -c US 2048-RSA newcert.p12 [password]
+
+
+----
+A quick way to merge the Air SDK and the Flex SDK:
+
+sudo rsync -zvr /Users/[user]/Development/Adobe/AdobeAIRSDK_3.2/ /Users/[user]/Development/Adobe/flex_sdk_4.6.0.23201_mpl

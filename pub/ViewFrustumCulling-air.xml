@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://ns.adobe.com/air/application/3.2">
+  <id>com.jacksondunstan.ViewFrustumCulling</id>
+  <versionNumber>1.0</versionNumber>
+  <filename>ViewFrustumCulling</filename>
+  <name>ViewFrustumCulling</name>
+  <initialWindow>
+    <renderMode>direct</renderMode>
+    <depthAndStencil>true</depthAndStencil>
+    <content>deploy/ViewFrustumCulling.swf</content>
+    <visible>true</visible>
+    <resizable>false</resizable>
+    <maximizable>false</maximizable>
+    <transparent>false</transparent>
+    <width>1024</width>
+    <height>768</height>
+    <systemChrome>standard</systemChrome>
+  </initialWindow>
+  <icon>
+    <image48x48>deploy/iosImages/icons/icon48.png</image48x48>
+  </icon>
+</application>
